@@ -1,0 +1,226 @@
+---
+layout:     post
+title:      "Unity3D按键输入输出控制"
+subtitle:   "第二篇"
+date:       2016-04-18 16:00:00
+author:     "Muyong"
+header-img: "img/in-post/default-bg.jpg"
+tags:
+    - 编程小技巧
+---
+
+## 导语！
+### 博客开通这么久还没更新东西，实在是愧对初心啊，今天就来一些干货吧！
+**相必有人看到标题可能会不是很懂内容会是什么东西，其实我也不知道怎么起这篇文章的标题，总的在这里用一句话来解释一下：也就是在项目中用一个接口统一的管理整个项目中的按键检测和监听。什么，这样还不懂，那给你举个栗子：比如我们平常开发小Demo的时候处理按键一些按钮按下什么的会有这类“Input.GetKeyDown(KeyCode.xxx)”代码要写吧！那假如项目足够大的时候，按键检测增多的时候，项目里会大量的充斥着“Input.GetKeyDo...xxx”,这样不但会使代码看起来略显臃肿，还不好维护，下面文章将开始介绍这种情况我们怎么解决，嗯，说了这么多，还是赶紧开始吧！ ^-^。**
+
+首先我们Creat一个c#脚本文件，就起名字"IoCrotroller"吧！接着我们要声明一个这样的枚举```KeyValue```，枚举值分别代表你项目中所要使用的所有按键，如此处Fly为"飞"
+
+<pre><code>
+using UnityEngine;
+using System.Collections;
+public enum KeyValue
+{
+    Return = 0,
+    Run,
+    Attack,
+    None  
+};
+public class IOController：MonoBehaviour{
+
+}
+</pre></code>
+
+其次，我们还有例外一个枚举```PlayerType```，枚举值所代表你的按键所能作用的区域，比如这里的```Back```代表后台，```Pre```则代表前台，要这样把按键区分区域是因为有可能你用同一个按键处理不同的事件，以免产生冲突。
+<pre><code>	
+    Attack,
+    None  
+};
+public enum PlayerType
+{
+    InGame,
+    InUI,
+    None,
+};
+public class IOController：MonoBehaviour{
+
+}
+</pre></code>
+
+接下来我们还要申明一个结构体```KeyEven```，我们的按键会有多种表现形式，比如长按，短按等，此处结构体变量肯定是上面的按键枚举值啦，相对应的意思就是Fly键长按，Fly键短按。。。。。等等。很容易理解不是么^_^!。
+
+<pre><code>
+    InUI,
+    None,
+};
+public struct KeyEven
+{
+    public KeyValue keyValue;
+    public bool isLong;
+}
+public class IOController：MonoBehaviour{
+
+}
+
+</pre></code>
+
+现在我们要每时每刻都要检查是否有"KeyValue"里的按键被按下，按照逻辑我们要每时每刻都要遍历KeyValue里的元素，然后得到下面的代码。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+<pre><code>
+    public KeyValue keyValue;
+    public bool isLong;
+}
+public class IOController：MonoBehaviour{
+
+	void Update()
+	{
+            for (int i = 0; i < (int)KeyValue.None; i++)
+            {
+            	GetKey((KeyValue)i)；
+            }
+	}
+
+	private bool GetKey(KeyValue keyType)
+	{
+		bool ret = false;
+		KeyCode u3dKey = KeyCode.None;
+		switch (keyType)
+		{
+
+			case KeyValue.Return:
+				u3dKey = KeyCode.Return;
+				break;
+			case KeyValue.Run:
+				u3dKey = KeyCode.R;
+				break;
+			case KeyValue.Attack:
+				u3dKey = KeyCode.A;
+				break;
+			default:
+				u3dKey = KeyCode.None;
+				break;
+		}
+
+		ret = Input.GetKey(u3dKey);
+
+		return ret;
+	}
+}
+</pre></code>
+
+接着我们要检测遍历到的当前按键是否是长按或者短按，我们先声明一个Dictionary来存储按键枚举并把按下按键的时间当作键值，检测的时候我们直接从里面取到时间就行了，我们还要有几个Queue用来存储不同区域所作用的按键。
+<pre><code>
+private Dictionary<KeyValue, float> mKeyTimeSum = new Dictionary<KeyValue, float>();
+public Queue<KeyEven> mKeyInGameEvenList = new Queue<KeyEven>();
+public Queue<KeyEven> mKeyInUIEvenList = new Queue<KeyEven>();
+void Update()
+{
+
+     for (int i = 0; i < (int)KeyValue.None; i++)
+     {
+     	if(GetKey((KeyValue)i))
+        {
+			HandleKeyDown((KeyValue)i);
+        }else
+		{
+			HandleKeyUp((KeyValue)i);
+		}
+     }
+}
+private void HandleKeyDown(KeyValue keyType)
+{
+	 KeyEven key;
+        key.keyValue = KeyValue.None;
+        key.isLong = false;
+        if (mKeyTimeSum.ContainsKey(keyType))
+        {
+            if (Time.time - mKeyTimeSum[keyType] > 1.0f)
+            {
+
+                key.keyValue = keyType;
+                key.isLong = true;
+
+            }
+        }
+        else
+        {
+            mKeyTimeSum.Add(keyType, Time.time);
+
+            key.keyValue = keyType;
+            key.isLong = false;
+        }
+
+        if (KeyValue.None != key.keyValue)
+        {
+
+            
+            if (KeyValue.Run == key.keyValue)
+            {
+                mKeyInGameEvenList.Enqueue(key);
+            }
+
+            if (KeyValue.Attack == key.keyValue)
+            {
+                mKeyInUIEvenList.Enqueue(key);
+  
+            }
+
+        }
+        
+    }
+}
+private void HandleKeyUp(KeyValue keyType)
+{
+   if (mKeyTimeSum.ContainsKey(keyType))
+   {
+       mKeyTimeSum.Remove(keyType);
+   }
+}
+</pre></code>
+
+最后我们再提供一个访问访问的函数就行了
+<pre><code>
+public KeyEven GetKeyEven(PlayerType listType)
+{
+        Queue<KeyEven> list;
+
+        if (PlayerType.Run == listType)
+        {
+            list = mKeyInGameEvenList;
+        }
+        else (PlayerType.Attack == listType)
+        {
+            list = mKeyInUIEvenList;
+        }
+
+        KeyEven ret;
+        ret.keyValue = KeyValue.None;
+        ret.isLong = false;
+
+        if (list.Count != 0)
+        {
+            ret = list.Dequeue();
+        }
+
+        return ret;
+}
+</pre></code>
+好了，就这样，我们以后只要在项目中的任何地方要用到按键点击点击检测只需如下两行代码搞定
+<pre><code>
+KeyEven keyEven = IOController.GetInstance().GetKeyEven(PlayerType.InGame);
+或者
+KeyEven keyEven = IOController.GetInstance().GetKeyEven(PlayerType.InUI);
+</pre></code>
+检测的时候就可以这样
+<pre><code>
+if (KeyValue.Run == keyEven.keyValue)
+{
+	xxxxx...
+	xxxxx...
+}
+或者
+if (KeyValue.Attack == keyEven.keyValue)
+{
+	xxxxx...
+	xxxxx...
+}
+</pre></code>
+到这里就结束了，是不是很方便呢。
